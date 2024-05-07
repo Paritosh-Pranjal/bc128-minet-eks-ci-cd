@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: be-portfolio-service-deployment
+   labels:
+      type: portfolio-service-deployment
+      app: backend-ps-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: portfolio-service
+  template:
+    metadata:
+      name: portfolio-service-pod
+      labels:
+        type: portfolio-service
+    spec:
+      containers:
+      - name: bc128-backend-portfolio-service
+        image: ghcr.io/paritosh-pranjal/bc128-be-eks-portfolio-service:v5
+        ports:
+        - containerPort: 9093
+        env:
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            value: http://service-registry-svc:8761/eureka/
+          - name: EUREKA_INSTANCE_HOSTNAME
+            value: portfolio-service-svc
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:mysql://3.144.194.161:31037/minet_bc_128 
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: username
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: database-secret
+                  key: password
+          - name: SPRING_FLYWAY_URL
+            value: jdbc:mysql://3.144.194.161:31037/minet_bc_128 
+          - name: SPRING_FLYWAY_USER
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: username
+          - name: SPRING_FLYWAY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: database-secret
+                  key: password
+      imagePullSecrets: 
+      - name: ghcr-secret

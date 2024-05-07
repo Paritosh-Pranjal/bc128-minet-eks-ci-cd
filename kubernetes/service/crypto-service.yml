@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: crypto-service-svc
+spec:
+  ports:
+  - targetPort: 9092
+    port: 9092
+  selector:
+    type: crypto-service

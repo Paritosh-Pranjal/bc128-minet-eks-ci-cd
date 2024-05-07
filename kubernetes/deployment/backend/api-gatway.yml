@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: be-api-gateway-deployment
+   labels:
+      type: api-gateway-deployment
+      app: backend-ag-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: api-gateway
+  template:
+    metadata:
+      name: api-gateway-pod
+      labels:
+        type: api-gateway
+    spec:
+      containers:
+      - name: bc128-backend-api-gateway
+        image: ghcr.io/paritosh-pranjal/bc128-be-eks-api-gateway:v16
+        ports:
+        - containerPort: 9191
+        env:
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            value: http://service-registry-svc:8761/eureka/
+          - name: EUREKA_INSTANCE_HOSTNAME
+            value: api-gateway-svc
+          - name: SECRET_ID
+            valueFrom:
+              secretKeyRef:
+                key: SECRET_ID
+                name: secret-id
+      imagePullSecrets: 
+      - name: ghcr-secret

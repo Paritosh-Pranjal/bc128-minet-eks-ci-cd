@@ -1,0 +1,77 @@
+name: Backend CI/CD
+run-name: Backend deployment  triggered by ${{ github.actor }}
+
+on:
+  push:
+    branches:
+      - deployment
+    paths:
+      - .github/workflows/backendDeploy.yml
+      - backend/**
+
+jobs:
+  build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/${{ matrix.services }}
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        services:
+          - api-gateway
+          - crypto-service
+          - service-registry
+          - portfolio-service
+          - user-service
+          - wallet-service
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "corretto"
+          java-version: "17"
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ matrix.services }}-${{ hashFiles(join(matrix.services, '/**/pom.xml')) }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push the docker image to ghcr
+        uses: docker/build-push-action@v4
+        with:
+          context: backend/${{ matrix.services }}
+          push: true
+          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/bc128-be-eks-${{ matrix.services }}:v${{ github.run_number }}
+
+      - name: configure aws
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:  ${{secrets.AWS_EKS_REGION}}
+    
+      - name: adding eks-cluster
+        run: aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }} --region ${{secrets.AWS_EKS_REGION}}
+
+      - name: Deploy the service on EKS
+        run: |
+          kubectl set image deployment/be-${{ matrix.services }}-deployment bc128-backend-${{ matrix.services }}=ghcr.io/${{ secrets.GHCR_USERNAME }}/bc128-be-eks-${{ matrix.services }}:v${{ github.run_number }}

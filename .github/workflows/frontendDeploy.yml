@@ -1,0 +1,75 @@
+name: Frontend CI/CD
+run-name: Frontend deployment  triggered by ${{ github.actor }}
+
+on:
+    push:
+        branches: 
+            - deployment
+        paths:
+            - .github/workflows/frontendDeploy.yml
+            - frontend/**
+            
+
+jobs:
+    build:
+        name: Frontend Build
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: frontend
+        timeout-minutes: 10
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                node-version: 18
+
+            - name: Retrieve the env vars
+              run: echo "${{ secrets.FE_ENV }}" > .env
+              
+
+            - name: Cache Node Modules
+              uses: actions/cache@v3
+              id: cache
+              with:
+                path: frontend/node_modules
+                key: ${{ runner.os }}-frontend-node_modules-${{ hashFiles('frontend/package.json') }}
+                        
+            - name: Install Dependencies
+              if: steps.cache.outputs.cache-hit != 'true'
+              run: npm install
+
+            - name: Build application
+              run: npm run build
+
+            - name: Login to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                registry: ghcr.io
+                username: ${{ github.repository_owner }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Push the docker image to ghcr
+              uses: docker/build-push-action@v4
+              with:
+                context: ./frontend
+                push: true
+                tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/bc128-fe-eks:v${{ github.run_number }}
+
+            - name: configure aws
+              uses: aws-actions/configure-aws-credentials@v2
+              with:
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                aws-region:  ${{secrets.AWS_EKS_REGION}}
+                    
+            - name: update kubeconfig
+              run: aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }} --region ${{ secrets.AWS_EKS_REGION }}
+  
+  
+            - name: update the frontend image
+              run: kubectl set image deployment/frontend-deployment-bc-128 minet-frontend=ghcr.io/${{ secrets.GHCR_USERNAME }}/bc128-fe-eks:v${{ github.run_number }}
