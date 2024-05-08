@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -74,6 +74,11 @@ jobs:
 
           echo "::set-output name=changed-services::$json_array"
           echo "Changed services normal: ${changed_services[*]}"
+      - name: Print changed services from JSON
+        run: |
+          echo "Changed services from JSON: ${{fromJson(needs.backendFoldersChanged.outputs.changed-services)}}"
+          pwd
+          echo "Changed services from set-output: ${{ steps.set-output.outputs.changed-services }}"
 
   build:
     name: Backend Build
@@ -85,7 +90,7 @@ jobs:
         services: ${{fromJson(needs.backendFoldersChanged.outputs.changed-services)}}
     defaults:
       run:
-        working-directory: backend/${{ matrix.services}}
+        working-directory: backend/${{ matrix.services }}
 
     steps:
       - name: Checkout Repository
