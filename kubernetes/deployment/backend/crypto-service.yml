@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: be-crypto-service-deployment
+   labels:
+      type: crypto-service-deployment
+      app: backend-ps-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: crypto-service
+  template:
+    metadata:
+      name: crypto-service-pod
+      labels:
+        type: crypto-service
+    spec:
+      containers:
+      - name: bc128-backend-crypto-service
+        image: ghcr.io/paritosh-pranjal/bc128-be-eks-crypto-service:v5
+        ports:
+        - containerPort: 9092
+        env:
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            value: http://service-registry-svc:8761/eureka/
+          - name: EUREKA_INSTANCE_HOSTNAME
+            value: crypto-service-svc
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:mysql://3.144.194.161:31037/minet_bc_128 
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: username
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: database-secret
+                  key: password
+          - name: geckoUrl
+            value: https://api.coingecko.com/api/v3/coins/markets
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: size
+                    operator: In
+                    values:
+                    - small
+      imagePullSecrets: 
+      - name: ghcr-secret

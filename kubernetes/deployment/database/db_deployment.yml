@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment-bc-128
+  labels:
+    type: mysql-db
+    app: database-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: mysql
+      app: database-pod
+  template:
+    metadata:
+      name: mysql-pod
+      labels:
+        type: mysql
+        app: database-pod
+    spec:
+      containers:
+      - name: mysql-image
+        image: mysql:latest
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+                name: database-secret
+                key: password
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mysql-db-volume
+      volumes:
+         - name: mysql-db-volume
+           persistentVolumeClaim:
+             claimName: pvc-db-bc-128
+      nodeName: ip-172-31-42-173.us-east-2.compute.internal

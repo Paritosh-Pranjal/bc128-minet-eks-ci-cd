@@ -11,7 +11,7 @@ import java.security.Key;
 @Component
 public class JwtUtil {
 
-    @Value("${secret.id}")
+    @Value("${SECRET_ID}")
     private String SECRET;
 
     public void validateToken(final String token) {

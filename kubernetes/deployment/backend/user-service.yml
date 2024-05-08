@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: be-user-service-deployment
+   labels:
+      type: user-service-deployment
+      app: backend-us-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: user-service
+  template:
+    metadata:
+      name: user-service-pod
+      labels:
+        type: user-service
+    spec:
+      containers:
+      - name: bc128-backend-user-service
+        image: ghcr.io/paritosh-pranjal/bc128-be-eks-user-service:v16
+        ports:
+        - containerPort: 9091
+        env:
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            value: http://service-registry-svc:8761/eureka/
+          - name: EUREKA_INSTANCE_HOSTNAME
+            value: user-service-svc
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:mysql://3.144.194.161:31037/minet_bc_128 
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: username
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: database-secret
+                  key: password
+          - name: SPRING_FLYWAY_URL
+            value: jdbc:mysql://3.144.194.161:31037/minet_bc_128 
+          - name: SPRING_FLYWAY_USER
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: username
+          - name: SPRING_FLYWAY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                  name: database-secret
+                  key: password
+          - name: SECRET_ID
+            valueFrom:
+              secretKeyRef:
+                key: SECRET_ID
+                name: secret-id
+      nodeName: ip-172-31-42-173.us-east-2.compute.internal
+      imagePullSecrets: 
+      - name: ghcr-secret
