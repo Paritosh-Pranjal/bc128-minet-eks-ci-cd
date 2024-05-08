@@ -37,6 +37,7 @@ jobs:
           services=("api-gateway" "crypto-service" "portfolio-service" "service-registry" "user-service" "wallet-service")  
           backend_workflow_changed=false
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+              echo "file1: $file"
               path=$(echo "$file" | cut -d'/' -f3)
               echo "Path1: $path"
               if [[ "backend.yaml" == $path ]]; then
@@ -50,6 +51,7 @@ jobs:
 
           if [[ $backend_workflow_changed == false ]]; then
               for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+                  echo "file2: $file"
                   path=$(echo "$file" | cut -d'/' -f2)
                   echo "Path2: $path"
                   already_exists=false

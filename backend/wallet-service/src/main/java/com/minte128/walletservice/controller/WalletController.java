@@ -10,12 +10,13 @@ import org.springframework.validation.annotation.Validated;
 
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/v1/wallets")
 @Validated
 @CrossOrigin(origins = {"*"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT, RequestMethod.PATCH}, allowedHeaders = "*", exposedHeaders = "Access-Control-Allow-Origin")
 public class WalletController {
-    
+
     @Autowired
     private WalletService walletService;
 
