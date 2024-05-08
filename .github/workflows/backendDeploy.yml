@@ -48,15 +48,11 @@ jobs:
 
           if [[ $backend_workflow_changed == false ]]; then
               for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-                  echo "file2: $file"
                   path=$(echo "$file" | cut -d'/' -f2)
-                  echo "Path2: $path"
                   already_exists=false
-                  echo "Changed Services2: ${changed_services[@]}"
                   for changed in "${changed_services[@]}"; do
                       if [[ $changed == $path ]]; then
                           already_exists=true
-                          echo "$already_exists"
                           break
                       fi
                   done
@@ -64,7 +60,6 @@ jobs:
                       for service in "${services[@]}"; do
                           if [[ $service == $path ]]; then
                               changed_services+=("$path")
-                              echo "Changed Services3: ${changed_services[@]}"
                               break
                           fi
                       done  
@@ -79,7 +74,6 @@ jobs:
           json_array+="]"
 
           echo "::set-output name=changed-services::$json_array"
-          echo $json_array
           echo "Changed services normal: ${changed_services[*]}"
 
   build:
