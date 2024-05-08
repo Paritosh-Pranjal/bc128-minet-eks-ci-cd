@@ -31,5 +31,6 @@ spec:
               secretKeyRef:
                 key: SECRET_ID
                 name: secret-id
+      nodeName: ip-172-31-42-173.us-east-2.compute.internal
       imagePullSecrets: 
       - name: ghcr-secret

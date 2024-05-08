@@ -21,5 +21,14 @@ spec:
         image: ghcr.io/paritosh-pranjal/bc128-be-eks-service-registry:v3
         ports:
         - containerPort: 8761
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: size
+                    operator: In
+                    values:
+                    - small
       imagePullSecrets: 
       - name: ghcr-secret

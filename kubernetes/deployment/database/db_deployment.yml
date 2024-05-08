@@ -36,3 +36,4 @@ spec:
          - name: mysql-db-volume
            persistentVolumeClaim:
              claimName: pvc-db-bc-128
+      nodeName: ip-172-31-42-173.us-east-2.compute.internal

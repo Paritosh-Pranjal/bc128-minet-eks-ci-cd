@@ -10,22 +10,82 @@ on:
       - backend/**
 
 jobs:
+  backendFoldersChanged:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+
+    outputs:
+      changed-services: ${{ steps.set-output.outputs.changed-services }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v37
+
+      - name: Determine changed services
+        id: set-output
+        run: |
+          changed_services=()
+          services=("api-gateway" "crypto-service" "portfolio-service" "service-registry" "user-service" "wallet-service")  
+          backend_workflow_changed=false
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+              path=$(echo "$file" | cut -d'/' -f3)
+              if [[ "backend.yaml" == $path ]]; then
+                  changed_services=("${services[@]}")
+                  backend_workflow_changed=true
+                  break
+              fi
+          done
+
+          if [[ $backend_workflow_changed == false ]]; then
+              for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+                  path=$(echo "$file" | cut -d'/' -f2)
+                  already_exists=false
+                  for changed in "${changed_services[@]}"; do
+                      if [[ $changed == $path ]]; then
+                          already_exists=true
+                          break
+                      fi
+                  done
+                  if [[ $already_exists == false ]]; then
+                      for service in "${services[@]}"; do
+                          if [[ $service == $path ]]; then
+                              changed_services+=("$path")
+                              break
+                          fi
+                      done  
+                  fi
+              done
+          fi
+
+          json_array="[\"${changed_services[0]}\""
+          for i in "${changed_services[@]:1}"; do
+              json_array+=",\"$i\""
+          done
+          json_array+="]"
+
+          echo "::set-output name=changed-services::$json_array"
+          echo "Changed services normal: ${changed_services[*]}"
+
   build:
     name: Backend Build
+    needs: backendFoldersChanged
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend/${{ matrix.services }}
+        working-directory: backend
     timeout-minutes: 10
     strategy:
       matrix:
-        services:
-          - api-gateway
-          - crypto-service
-          - service-registry
-          - portfolio-service
-          - user-service
-          - wallet-service
+        services: ${{fromJson(needs.backendFoldersChanged.outputs.changed-services)}}
 
     steps:
       - name: Checkout Repository

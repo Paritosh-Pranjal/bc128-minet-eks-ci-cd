@@ -40,5 +40,14 @@ spec:
                   key: password
           - name: geckoUrl
             value: https://api.coingecko.com/api/v3/coins/markets
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: size
+                    operator: In
+                    values:
+                    - small
       imagePullSecrets: 
       - name: ghcr-secret

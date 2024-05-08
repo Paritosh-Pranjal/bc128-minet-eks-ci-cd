@@ -50,5 +50,6 @@ spec:
               secretKeyRef:
                   name: database-secret
                   key: password
+      nodeName: ip-172-31-42-173.us-east-2.compute.internal
       imagePullSecrets: 
       - name: ghcr-secret
