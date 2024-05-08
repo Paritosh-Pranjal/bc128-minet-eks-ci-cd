@@ -37,13 +37,10 @@ jobs:
           services=("api-gateway" "crypto-service" "portfolio-service" "service-registry" "user-service" "wallet-service")  
           backend_workflow_changed=false
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-              echo "file1: $file"
               path=$(echo "$file" | cut -d'/' -f3)
-              echo "Path1: $path"
               if [[ "backendDeploy.yml" == $path ]]; then
                   echo "All Services: ${services[@]}"
                   changed_services=("${services[@]}")
-                  echo "Changed Services1: ${changed_services[@]}"
                   backend_workflow_changed=true
                   break
               fi
@@ -75,13 +72,13 @@ jobs:
           fi
 
           json_array="[\"${changed_services[0]}\""
-          echo $json_array
           for i in "${changed_services[@]:1}"; do
               json_array+=",\"$i\""
           done
           json_array+="]"
 
           echo "::set-output name=changed-services::$json_array"
+          echo $json_array
           echo "Changed services normal: ${changed_services[*]}"
 
   build:
