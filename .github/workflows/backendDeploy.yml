@@ -75,11 +75,6 @@ jobs:
           echo "::set-output name=changed-services::$json_array"
           echo "Changed services normal: ${changed_services[*]}"
 
-      - name: Print changed services from JSON
-        run: |
-          pwd
-          echo "Changed services from set-output: ${{ steps.set-output.outputs.changed-services }}"
-
   build:
     name: Backend Build
     needs: backendFoldersChanged
