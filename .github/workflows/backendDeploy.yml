@@ -76,7 +76,6 @@ jobs:
           echo "Changed services normal: ${changed_services[*]}"
       - name: Print changed services from JSON
         run: |
-          echo "Changed services from JSON: ${{fromJson(needs.backendFoldersChanged.outputs.changed-services)}}"
           pwd
           echo "Changed services from set-output: ${{ steps.set-output.outputs.changed-services }}"
 
