@@ -6,8 +6,8 @@ on:
     branches:
       - deployment
     paths:
-      - .github/workflows/backendDeploy.yml
-      - backend/**
+      - ".github/workflows/backendDeploy.yml"
+      - "backend/**"
 
 jobs:
   backendFoldersChanged:
@@ -74,7 +74,7 @@ jobs:
 
           echo "::set-output name=changed-services::$json_array"
           echo "Changed services normal: ${changed_services[*]}"
-          
+
       - name: Print changed services from JSON
         run: |
           pwd

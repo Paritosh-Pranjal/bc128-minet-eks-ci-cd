@@ -18,6 +18,7 @@ public class WalletController {
     @Autowired
     private WalletService walletService;
 
+    
     @GetMapping
     public ResponseEntity<WalletDto> getWalletDetailsById(@RequestParam("userId") int userId) {
         return new ResponseEntity<>(walletService.findByUserId(userId), HttpStatus.OK);

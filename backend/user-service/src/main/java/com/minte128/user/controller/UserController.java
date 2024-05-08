@@ -34,6 +34,7 @@ public class UserController {
         log.info("post new user");
         return userService.createUser(userDTO);
     }
+    
 
     @PostMapping("/login")
     public  ResponseEntity<LoginDTO> loginUser(@Validated @RequestBody UserDTO userDTO) {
