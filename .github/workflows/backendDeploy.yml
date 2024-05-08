@@ -40,7 +40,7 @@ jobs:
               echo "file1: $file"
               path=$(echo "$file" | cut -d'/' -f3)
               echo "Path1: $path"
-              if [[ "backend.yaml" == $path ]]; then
+              if [[ "backendDeploy.yml" == $path ]]; then
                   echo "All Services: ${services[@]}"
                   changed_services=("${services[@]}")
                   echo "Changed Services1: ${changed_services[@]}"
