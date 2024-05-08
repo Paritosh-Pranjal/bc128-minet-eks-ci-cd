@@ -79,13 +79,13 @@ jobs:
     name: Backend Build
     needs: backendFoldersChanged
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     timeout-minutes: 10
     strategy:
       matrix:
         services: ${{fromJson(needs.backendFoldersChanged.outputs.changed-services)}}
+    defaults:
+      run:
+        working-directory: backend/${{ matrix.services}}
 
     steps:
       - name: Checkout Repository
