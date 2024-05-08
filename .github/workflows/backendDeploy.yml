@@ -56,6 +56,7 @@ jobs:
                   for changed in "${changed_services[@]}"; do
                       if [[ $changed == $path ]]; then
                           already_exists=true
+                          echo "$already_exists"
                           break
                       fi
                   done
