@@ -38,8 +38,11 @@ jobs:
           backend_workflow_changed=false
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
               path=$(echo "$file" | cut -d'/' -f3)
+              echo "Path1: $path"
               if [[ "backend.yaml" == $path ]]; then
+                  echo "All Services: ${services[@]}"
                   changed_services=("${services[@]}")
+                  echo "Changed Services1: ${changed_services[@]}"
                   backend_workflow_changed=true
                   break
               fi
@@ -48,7 +51,9 @@ jobs:
           if [[ $backend_workflow_changed == false ]]; then
               for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
                   path=$(echo "$file" | cut -d'/' -f2)
+                  echo "Path2: $path"
                   already_exists=false
+                  echo "Changed Services2: ${changed_services[@]}"
                   for changed in "${changed_services[@]}"; do
                       if [[ $changed == $path ]]; then
                           already_exists=true
@@ -59,6 +64,7 @@ jobs:
                       for service in "${services[@]}"; do
                           if [[ $service == $path ]]; then
                               changed_services+=("$path")
+                              echo "Changed Services3: ${changed_services[@]}"
                               break
                           fi
                       done  
@@ -67,6 +73,7 @@ jobs:
           fi
 
           json_array="[\"${changed_services[0]}\""
+          echo $json_array
           for i in "${changed_services[@]:1}"; do
               json_array+=",\"$i\""
           done
